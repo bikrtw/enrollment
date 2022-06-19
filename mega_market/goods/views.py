@@ -1,17 +1,15 @@
 import datetime
-import urllib.parse
 from http import HTTPStatus
 
 from dateutil.parser import isoparse
-
 from django.shortcuts import get_object_or_404
 from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
 from .models import ShopUnit, update_category_prices, update_parents_date, \
-    ShopUnitType
-from .serializers import ShopUnitSerializer
+    ShopUnitType, ShopUnitStatisticUnit
+from .serializers import ShopUnitSerializer, ShopUnitStatisticUnitSerializer
 from .throttle import GetModifyRateThrottle, GetReadRateThrottle
 
 
@@ -46,7 +44,7 @@ def sales(request):
         date__lte=date
     )
     serializer = ShopUnitSerializer(sales, many=True)
-    return Response(serializer.data, status=HTTPStatus.OK)
+    return Response({'items': serializer.data}, status=HTTPStatus.OK)
 
 
 @api_view(['GET'])
@@ -55,10 +53,23 @@ def get_node_statistic(request, node_id):
     """
     Возвращает статистику по элементу - не доделано
     """
-    #TODO
-    node = get_object_or_404(ShopUnit, id=node_id)
-    serializer = ShopUnitSerializer(node)
-    return Response(serializer.data, status=HTTPStatus.OK)
+    date_from = request.query_params.get('dateStart')
+    date_to = request.query_params.get('dateEnd')
+    try:
+        if date_from:
+            date_from = isoparse(date_from)
+        if date_to:
+            date_to = isoparse(date_to)
+    except ValueError:
+        raise ParseError('Incorrect date format')
+
+    queryset = ShopUnitStatisticUnit.objects.filter(source_id=node_id)
+    if date_from:
+        queryset = queryset.filter(date__gte=date_from)
+    if date_to:
+        queryset = queryset.filter(date__lte=date_to)
+    serializer = ShopUnitStatisticUnitSerializer(queryset, many=True)
+    return Response({'items': serializer.data}, status=HTTPStatus.OK)
 
 
 @api_view(['POST'])

@@ -1,16 +1,16 @@
 from dateutil.parser import isoparse
-
 from rest_framework import serializers
 
-from .models import ShopUnit, ShopUnitType
+from .models import ShopUnit, ShopUnitType, ShopUnitStatisticUnit
 
 
 class ISO8601DateField(serializers.Field):
     """
     Преобразует дату в формат ISO 8601
     """
+
     def to_representation(self, value):
-        return value.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3]+'Z'
+        return value.strftime('%Y-%m-%dT%H:%M:%S.%f')[:-3] + 'Z'
 
     def to_internal_value(self, data):
         try:
@@ -20,10 +20,9 @@ class ISO8601DateField(serializers.Field):
 
 
 class ShopUnitSerializer(serializers.ModelSerializer):
-
     parentId = serializers.PrimaryKeyRelatedField(
         queryset=ShopUnit.objects,
-        source='parent_id',
+        source='parent',
         required=False,
         allow_null=True
     )
@@ -64,7 +63,13 @@ class ShopUnitSerializer(serializers.ModelSerializer):
                     'Parent must be different from current')
         return value
 
-# class ShopUnitStatisticUnitSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = ShopUnitStatisticUnit
-#         fields = '__all__'
+
+class ShopUnitStatisticUnitSerializer(serializers.ModelSerializer):
+    id = serializers.PrimaryKeyRelatedField(source='source', read_only=True)
+    parentId = serializers.PrimaryKeyRelatedField(
+        source='parent', read_only=True)
+    date = ISO8601DateField()
+
+    class Meta:
+        model = ShopUnitStatisticUnit
+        fields = ['id', 'name', 'date', 'price', 'type', 'parentId']
