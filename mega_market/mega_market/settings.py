@@ -48,14 +48,13 @@ INSTALLED_APPS = [
 ]
 
 REST_FRAMEWORK = {
+    'EXCEPTION_HANDLER': 'core.utils.custom_exception_handler',
     'DATETIME_FORMAT': "%Y-%m-%dT%H:%M:%S.%fZ",
     'DEFAULT_THROTTLE_RATES': {
         'read_anon': '100/second',
         'modify_anon': '1000/minute',
     }
 }
-if not DEBUG:
-    REST_FRAMEWORK['EXCEPTION_HANDLER'] = 'core.utils.custom_exception_handler'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -90,25 +89,24 @@ WSGI_APPLICATION = 'mega_market.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-if DEBUG:
-    DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-        }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
-else:
-    DATABASES = {
-        'default': {
-            'ENGINE': os.getenv(
-                'DB_ENGINE') or 'django.db.backends.postgresql',
-            'NAME': os.getenv('DB_NAME') or 'postgres',
-            'USER': os.getenv('POSTGRES_USER') or 'postgres',
-            'PASSWORD': os.getenv('POSTGRES_PASSWORD') or 'password',
-            'HOST': os.getenv('DB_HOST') or 'db',
-            'PORT': os.getenv('DB_PORT') or '5432'
-        }
-    }
+}
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': os.getenv(
+#             'DB_ENGINE') or 'django.db.backends.postgresql',
+#         'NAME': os.getenv('DB_NAME') or 'postgres',
+#         'USER': os.getenv('POSTGRES_USER') or 'postgres',
+#         'PASSWORD': os.getenv('POSTGRES_PASSWORD') or 'password',
+#         'HOST': os.getenv('DB_HOST') or 'db',
+#         'PORT': os.getenv('DB_PORT') or '5432'
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators

@@ -22,7 +22,6 @@ class ShopUnitABS(models.Model):
     class Meta:
         abstract = True
 
-    id = models.TextField(primary_key=True, max_length=36)
     name = models.TextField(max_length=255)
     date = models.DateTimeField()
     type = models.TextField(choices=ShopUnitType.choices(), max_length=8)
@@ -36,6 +35,7 @@ class ShopUnit(ShopUnitABS):
     """
     Товар, категория
     """
+    id = models.TextField(primary_key=True, max_length=36)
     parent = models.ForeignKey(
         to='ShopUnit',
         on_delete=models.CASCADE,
@@ -55,8 +55,6 @@ class ShopUnitStatisticUnit(ShopUnitABS):
                                     name='unique_update')
         ]
 
-    id = models.IntegerField(primary_key=True, auto_created=True)
-
     source = models.ForeignKey(
         to='ShopUnit',
         on_delete=models.CASCADE,
@@ -67,7 +65,8 @@ class ShopUnitStatisticUnit(ShopUnitABS):
         to='ShopUnit',
         on_delete=models.CASCADE,
         related_name='history_children',
-        null=True
+        null=True,
+        blank=True
     )
 
     def __str__(self):
