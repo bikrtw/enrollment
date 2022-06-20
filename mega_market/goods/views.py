@@ -51,8 +51,9 @@ def sales(request):
 @throttle_classes([GetReadRateThrottle])
 def get_node_statistic(request, node_id):
     """
-    Возвращает статистику по элементу - не доделано
+    Возвращает статистику по элементу
     """
+    node = get_object_or_404(ShopUnit, id=node_id)
     date_from = request.query_params.get('dateStart')
     date_to = request.query_params.get('dateEnd')
     try:
@@ -63,7 +64,7 @@ def get_node_statistic(request, node_id):
     except ValueError:
         raise ParseError('Incorrect date format')
 
-    queryset = ShopUnitStatisticUnit.objects.filter(source_id=node_id)
+    queryset = ShopUnitStatisticUnit.objects.filter(source=node)
     if date_from:
         queryset = queryset.filter(date__gte=date_from)
     if date_to:

@@ -7,7 +7,7 @@
 Клонировать репозиторий и перейти в него в командной строке:
 
 ```
-git clone git@github.com:bikrtw/enrollment.git
+git clone https://github.com/bikrtw/enrollment.git
 cd enrollment
 ```
 
@@ -20,19 +20,25 @@ cd docker
 Запустить docker-compose
 
 ```
-docker-compose up -d
+sudo docker-compose up -d
 ```
 
 Выполнить миграции, собрать статику (для работы админки):
 
 ```
-docker-compose exec web python manage.py migrate
-docker-compose exec web python manage.py collectstatic --no-input
+sudo docker-compose exec web python manage.py migrate
+sudo docker-compose exec web python manage.py collectstatic --no-input
+```
+
+Создать пользователя для админки:
+
+```
+sudo docker-compose exec web python manage.py createsuperuser
 ```
 
 Профит!
 
-## Содержимое файла .env:
+## Содержимое файла .env (для примера):
 ```
 DB_ENGINE=django.db.backends.postgresql # указываем, что работаем с postgresql
 DB_NAME=postgres # имя базы данных
@@ -40,4 +46,5 @@ POSTGRES_USER=postgres # логин для подключения к базе д
 POSTGRES_PASSWORD=password # пароль для подключения к БД (установите свой)
 DB_HOST=db # название сервиса (контейнера)
 DB_PORT=5432 # порт для подключения к БД
+DJANGO_SECRET_KEY=secret_key # ключ для шифрования данных
 ```
