@@ -89,24 +89,25 @@ WSGI_APPLICATION = 'mega_market.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+if DEBUG:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        }
     }
-}
-
-# DATABASES = {
-#     'default': {
-#         'ENGINE': os.getenv(
-#             'DB_ENGINE') or 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME') or 'postgres',
-#         'USER': os.getenv('POSTGRES_USER') or 'postgres',
-#         'PASSWORD': os.getenv('POSTGRES_PASSWORD') or 'password',
-#         'HOST': os.getenv('DB_HOST') or 'db',
-#         'PORT': os.getenv('DB_PORT') or '5432'
-#     }
-# }
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': os.getenv(
+                'DB_ENGINE') or 'django.db.backends.postgresql',
+            'NAME': os.getenv('DB_NAME') or 'postgres',
+            'USER': os.getenv('POSTGRES_USER') or 'postgres',
+            'PASSWORD': os.getenv('POSTGRES_PASSWORD') or 'password',
+            'HOST': os.getenv('DB_HOST') or 'db',
+            'PORT': os.getenv('DB_PORT') or '5432'
+        }
+    }
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
