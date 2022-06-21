@@ -3,6 +3,9 @@ import json
 import urllib.parse
 
 from django.test import TestCase, Client
+from django.urls import reverse
+
+from ..models import ShopUnit
 
 E400 = {'status': 400, 'message': 'Validation Failed'}
 E404 = {'status': 404, 'message': 'Item not found'}
@@ -52,7 +55,10 @@ class TestImports(TestCase):
             "updateDate": self.date_ok,
         }
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 200)
 
     def test_import_fail_bad_item_price(self):
@@ -64,7 +70,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_bad_category_price(self):
@@ -76,7 +85,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_bad_date(self):
@@ -86,7 +98,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_item_type(self):
@@ -98,7 +113,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_item_parent_id(self):
@@ -110,7 +128,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_item_parent_id_not_found(self):
@@ -122,7 +143,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_item_parent_id_not_category(self):
@@ -134,7 +158,10 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
     def test_import_fail_duplicate_id(self):
@@ -144,16 +171,133 @@ class TestImports(TestCase):
         }
 
         response = self.client.post(
-            '/imports/', json.dumps(data), content_type='application/json')
+            reverse('imports'),
+            json.dumps(data),
+            content_type='application/json'
+        )
         self.assertEqual(response.status_code, 400)
 
 
 class TestSales(TestCase):
-    def test_sales(self):
+    def test_sales_ok(self):
         params = urllib.parse.urlencode({
             "date": "2022-02-04T00:00:00.000Z"
         })
-        status, response = self.client.get(f"/sales?{params}",
-                                           json_response=True)
-        assert status == 200, f"Expected HTTP status code 200, got {status}"
-        print("Test sales passed.")
+
+        response = self.client.get(
+            f"{reverse('sales')}?{params}",
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_sales_no_date(self):
+        response = self.client.get("/sales", json_response=True)
+        self.assertEqual(response.status_code, 400)
+
+    def test_sales_bad_date(self):
+        params = urllib.parse.urlencode({
+            "date": "2022-99-99T00:00:00.000Z"
+        })
+        response = self.client.get(
+            f"{reverse('sales')}?{params}",
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 400)
+
+
+class TestDelete(TestCase):
+    def setUp(self):
+        self.guest_client = Client()
+
+        self.date_ok = "2022-05-28T21:12:01.000Z"
+        self.offer_uuid = "3fa85f64-5717-4562-b3fc-2c963f66a445"
+        self.offer = {
+            "id": self.offer_uuid,
+            "name": "Оффер",
+            "price": 2,
+            "type": "OFFER"
+        }
+
+    def test_delete_ok(self):
+        ShopUnit.objects.create(**self.offer, date=self.date_ok)
+        response = self.client.delete(
+            reverse('delete', args=[self.offer_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_delete_not_found(self):
+        response = self.client.delete(
+            reverse('delete', args=[self.offer_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class TestGet(TestCase):
+    def setUp(self):
+        self.guest_client = Client()
+
+        self.date_ok = "2022-05-28T21:12:01.000Z"
+        self.offer_uuid = "3fa85f64-5717-4562-b3fc-2c963f66a445"
+        self.missing_uuid = "3fa85f64-5717-4562-b3fc-2c963f66a446"
+        self.offer = {
+            "id": self.offer_uuid,
+            "name": "Оффер",
+            "price": 2,
+            "type": "OFFER"
+        }
+
+    def test_get_ok(self):
+        ShopUnit.objects.create(**self.offer, date=self.date_ok)
+        response = self.client.get(
+            reverse('nodes', args=[self.offer_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_get_not_found(self):
+        response = self.client.get(
+            reverse('nodes', args=[self.missing_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 404)
+
+
+class TestStatistics(TestCase):
+    def setUp(self):
+        self.guest_client = Client()
+
+        self.date_ok = "2022-05-28T21:12:01.000Z"
+        self.offer_uuid = "3fa85f64-5717-4562-b3fc-2c963f66a445"
+        self.missing_uuid = "3fa85f64-5717-4562-b3fc-2c963f66a446"
+        self.offer = {
+            "id": self.offer_uuid,
+            "name": "Оффер",
+            "price": 2,
+            "type": "OFFER"
+        }
+
+    def test_statistics_ok(self):
+        ShopUnit.objects.create(**self.offer, date=self.date_ok)
+        response = self.client.get(
+            reverse('get_node_statistic', args=[self.offer_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 200)
+
+    def test_statistics_not_found(self):
+        response = self.client.get(
+            reverse('get_node_statistic', args=[self.missing_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 404)
+
+    def test_statistics_deleted(self):
+        ShopUnit.objects.create(**self.offer, date=self.date_ok)
+        ShopUnit.objects.filter(id=self.offer_uuid).delete()
+        response = self.client.get(
+            reverse('get_node_statistic', args=[self.offer_uuid]),
+            json_response=True
+        )
+        self.assertEqual(response.status_code, 404)
