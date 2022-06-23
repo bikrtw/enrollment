@@ -27,15 +27,14 @@ class ShopUnitSerializer(serializers.ModelSerializer):
         allow_null=True
     )
 
-    children = serializers.SerializerMethodField()
+    price = serializers.IntegerField(required=False, allow_null=True)
 
     date = ISO8601DateField()
 
     class Meta:
         model = ShopUnit
         fields = (
-            'id', 'name', 'type', 'parentId', 'date', 'price', 'children')
-        read_only_fields = ('children',)
+            'id', 'name', 'type', 'parentId', 'date', 'price')
 
     def get_children(self, obj):
         if obj.type == ShopUnitType.CATEGORY.value:

@@ -7,7 +7,7 @@ from rest_framework.decorators import api_view, throttle_classes
 from rest_framework.exceptions import ParseError
 from rest_framework.response import Response
 
-from .models import ShopUnit, update_category_prices, update_parents_date, \
+from .models import ShopUnit, update_parents_date, \
     ShopUnitType, ShopUnitStatisticUnit
 from .serializers import ShopUnitSerializer, ShopUnitStatisticUnitSerializer
 from .throttle import GetModifyRateThrottle, GetReadRateThrottle
@@ -109,7 +109,6 @@ def imports(request):
 
         created.append(serializer.save())
 
-    update_category_prices()
     update_parents_date(list(ids), updated)
 
     return Response(status=HTTPStatus.OK)
@@ -125,5 +124,4 @@ def delete(request, node_id):
     node = get_object_or_404(ShopUnit, id=node_id)
     node.delete()
 
-    update_category_prices()
     return Response(status=HTTPStatus.OK)
